@@ -1,9 +1,24 @@
 # NarrowCast
 A simple html/javascript/css based narrow cast player that can run on e.g. a Raspberry Pi.
 
-To view it in a web browser, click [here](https://maarten-pennings.github.io/NarrowCast/narrowcast.html).
+# Introduction
+This project is basically a single html file (with embedded javascript and css) that acts as a narrow cast player.
+It needs a _list_ of channels. A _channel_ is an xml file listing _pages_.
+A page is a (screen sized) images with a title and description.
 
-The actual sources can be found in the github
+The player loads all channel files, merges them into one list of pages, shuffles the list, and then shows each page for several seconds.
+After a longer time, the channel files are reloaded, merged and shuffled again.
+
+This project delivers the player `narrowcast.html`, and example channel files (`art` and `weather`).
+You would copy `narrowcast.html` and write you own channel files.
+
+# Demo
+To view narrowcast in a web browser, click [here](https://maarten-pennings.github.io/NarrowCast/narrowcast.html).
+
+It is suggested to open the browser in full-screen mode (F11).
+
+# Sources
+The actual sources of this project can be found in the github
 [web project](https://github.com/maarten-pennings/maarten-pennings.github.io/tree/master/NarrowCast).
 
 # Setup
@@ -25,5 +40,3 @@ For the latter, assuming you use apache on Ubuntu
  - edit file `000-default.conf`
  - add the fragment `<Directory /var/www/html/rss>Header set Access-Control-Allow-Origin *</Directory>`
    assuming the xmls files are in `/var/www/html/rss`
-
-   
