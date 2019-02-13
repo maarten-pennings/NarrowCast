@@ -13,7 +13,8 @@ This project delivers the player `narrowcast.html`, and example channel files (`
 You would copy `narrowcast.html` and write you own channel files.
 
 # Demo
-To view narrowcast in a web browser, click [here](https://maarten-pennings.github.io/NarrowCast/narrowcast.html).
+To view narrowcast in a web browser, click 
+[here](https://maarten-pennings.github.io/NarrowCast/narrowcast.html?example.list.xml&mix).
 
 It is suggested to open the browser in full-screen mode (F11).
 
