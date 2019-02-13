@@ -40,3 +40,35 @@ For the latter, assuming you use apache on Ubuntu
  - edit file `000-default.conf`
  - add the fragment `<Directory /var/www/html/rss>Header set Access-Control-Allow-Origin *</Directory>`
    assuming the xmls files are in `/var/www/html/rss`
+
+# Raspberry Pi
+As a content player, a Raspberry Pi is very effective.
+A standard Rasbian image suffices; it has the Chromium browser to render the NarrowCast webpage.
+
+To make the Raspberry Pi automatically run the browser with the webpage, and to prevent the screensaver
+from kicking in, create an `/home/pi/.config/lxsession/LXDE-pi/autostart` file. A default one
+can be copied from `/etc/xdg/lxsession/LXDE-pi/autostart`.
+
+Next edit it. I uncommented one line and added some others
+
+```
+# Next lines were present
+@lxpanel --profile LXDE-pi
+@pcmanfm --desktop --profile LXDE-pi
+@point-rpi
+
+# Next lines were existing but commented out by Maarten
+## Do not enable screensaver
+#@xscreensaver -no-splash
+
+# Next lines were added by Maarten
+## Disable screen saver blanking
+@xset s off
+## Turn off Display Power Management Signaling
+@xset -dpms
+## Don't blank the video device
+@xset s noblank
+## Start webbrowser
+@chromium-browser --incognito --kiosk https://maarten-pennings.github.io/NarrowCast/narrowcast.html?example.list.xml&mix
+```
+
