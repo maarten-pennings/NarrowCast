@@ -1,9 +1,11 @@
 # NarrowCast
-A simple html/javascript/css based narrow cast player that can run on e.g. a Raspberry Pi.
+A simple html/javascript/css based narrowcast player that can run on e.g. a Raspberry Pi.
 
+Narrowcasting is the dissemination of information to a narrow audience; 
+in our case: "big screens" in "coffee corners" or "shopping windows".
 
 # Introduction
-This project is basically a single html file (with embedded javascript and css) that acts as a narrow cast player.
+This project is basically a single html file (with embedded javascript and css) that acts as a narrowcast player.
 It needs a _list_ of channels. A _channel_ is an xml file listing _pages_.
 A page is a (screen sized) images with a title and description.
 
@@ -13,6 +15,7 @@ After a longer time, the channel files are reloaded, merged and shuffled again.
 This project delivers the player `narrowcast.html`, an example playlist file (`example.list.xml`),
 channel files (`art.channel.xml` and `weather.channel.xml`) and two example images (`logo.png` and `bg.jpg`).
 You would copy `narrowcast.html` and create your own playlist, channel and image files.
+All these files are stored on a webserver, and retrieved by Raspberry Pi's attached to big screens.
 
 
 # Demo
