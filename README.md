@@ -1,6 +1,7 @@
 # NarrowCast
 A simple html/javascript/css based narrow cast player that can run on e.g. a Raspberry Pi.
 
+
 # Introduction
 This project is basically a single html file (with embedded javascript and css) that acts as a narrow cast player.
 It needs a _list_ of channels. A _channel_ is an xml file listing _pages_.
@@ -9,8 +10,10 @@ A page is a (screen sized) images with a title and description.
 The player loads all channel files, merges them into one list of pages, shuffles the list, and then shows each page for several seconds.
 After a longer time, the channel files are reloaded, merged and shuffled again.
 
-This project delivers the player `narrowcast.html`, and example channel files (`art` and `weather`).
-You would copy `narrowcast.html` and write you own channel files.
+This project delivers the player `narrowcast.html`, an example playlist file (`example.list.xml`),
+channel files (`art.channel.xml` and `weather.channel.xml`) and two example images (`logo.png` and `bg.jpg`).
+You would copy `narrowcast.html` and create your own playlist, channel and image files.
+
 
 # Demo
 To view narrowcast in a web browser, click 
@@ -18,9 +21,15 @@ To view narrowcast in a web browser, click
 
 It is suggested to open the browser in full-screen mode (F11).
 
+Use Chrome, Frirefox, Edge, but not IE (sorry).
+
+
 # Sources
 The actual sources of this project can be found in the github
 [web project](https://github.com/maarten-pennings/maarten-pennings.github.io/tree/master/NarrowCast).
+
+This project only serves as documentation.
+
 
 # Setup
 The `narrowcast.html` is the player.
@@ -41,6 +50,7 @@ For the latter, assuming you use apache on Ubuntu
  - edit file `000-default.conf`
  - add the fragment `<Directory /var/www/html/rss>Header set Access-Control-Allow-Origin *</Directory>`
    assuming the xmls files are in `/var/www/html/rss`
+
 
 # Raspberry Pi
 As a content player, a Raspberry Pi is very effective.
@@ -72,6 +82,7 @@ Next edit it. I uncommented one line and added some others
 ## Start webbrowser
 @chromium-browser --incognito --kiosk https://maarten-pennings.github.io/NarrowCast/narrowcast.html?example.list.xml&mix
 ```
+
 
 # Server side
 We can also run scripts on the (central) server, so that we can bridge non-picture contents to picture content.
