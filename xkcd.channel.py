@@ -6,6 +6,8 @@
 #   https://www.howtoforge.com/tutorial/how-to-run-python-scripts-with-apache-and-mod_wsgi-on-ubuntu-18-04/
 
 # Create a python scipt (e.g. xkcd.channel.py) and assign rights
+#   cd /var/www/html/rss
+#   sudo vi xkcd.channel.py
 #   sudo chown maarten:www-data xkcd.channel.py
 #   sudo chmod 755 xkcd.channel.py
 
@@ -35,7 +37,7 @@ def text(elm):
     return val
 
 
-# Parse the XKCD rss feed and return the first item in a tuple (title, desc, src)
+# Parse the XKCD rss feed and return the first rss item as a tuple (title, desc, src)
 # Returns None on parsing error
 def parse(page):
     # Parse the page to get the first item
@@ -68,7 +70,7 @@ def application(environ, start_response):
     page= resp.read()
     # processing
     result= parse(page)
-    if result==None: result=('Error',url, 'https://imgs.xkcd.com/comics/not_available.png')
+    if result==None: result=('Error',url,'https://imgs.xkcd.com/comics/not_available.png')
     # output
     status = '200 OK'
     xml=  '<?xml version="1.0" encoding="utf-8"?>\r\n'\
