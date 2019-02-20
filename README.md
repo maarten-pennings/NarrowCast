@@ -86,7 +86,10 @@ Next edit it. I uncommented one line and added some others
 @chromium-browser --incognito --kiosk https://maarten-pennings.github.io/NarrowCast/narrowcast.html?example.list.xml&mix
 ```
 
-
-# Server side
+# Bridges (server side scripts)
 We can also run scripts on the (central) server, so that we can bridge non-picture contents to picture content.
 A simple example is provided for [python](xkcd.channel.py).
+
+Another example is bridging existing RSS feeds. 
+Since CORS prevents the Raspberry Pi to load and interpret RSS feeds that do not come from the central server,
+a brdige script on the central server prevents this. See [python](rss.channel.py).
