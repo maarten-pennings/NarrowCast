@@ -23,9 +23,10 @@
 import sys
 import urllib2
 import xml.dom.minidom
+import urlparse
 
 
-# Download a file given its URL, and returns it as a DOM (xml tree)
+# Download a file, given its URL, and return it as a DOM (xml tree)
 def xml_get(url):
     req= urllib2.Request(url)
     resp= urllib2.urlopen(req)
@@ -33,7 +34,7 @@ def xml_get(url):
     return xml.dom.minidom.parseString(data)
 
 
-# Get the text string from an element (savely)
+# Get the text string from a DOM element (safely)
 def xml_text(node):
     if node==None: return ""
     child= node.firstChild
@@ -43,7 +44,7 @@ def xml_text(node):
     return val
 
 
-# Helper to create a DOM node for an rss item
+# Helper to create a DOM node for an rss <item>
 def xml_createitem(xml,simg,stitle,sdescription):
     item= xml.createElement('item'); item.appendChild(xml.createTextNode('\r\n'))
     enclosure= xml.createElement('enclosure'); item.appendChild(enclosure); item.appendChild(xml.createTextNode('\r\n'))
@@ -63,10 +64,27 @@ def xml_getChildrenByTagName(parent,tagname):
     return list
 
 
+# Helper to create an "empty" rss feed when there is an error
+def xml_error(error):
+    # Create empty xml_out 
+    xml_out= xml.dom.minidom.Document(); 
+    rss_out= xml_out.createElement('rss'); xml_out.appendChild(rss_out); 
+    channel_out= xml_out.createElement('channel'); rss_out.appendChild(channel_out)
+    # Create title
+    chtitle_out= xml_out.createElement('title'); channel_out.appendChild(chtitle_out)
+    chtitle_out.appendChild( xml_out.createTextNode( 'Error' ) )
+    channel_out.appendChild(xml_out.createTextNode('\r\n\r\n')); 
+    # Create one item
+    item_out= xml_createitem(xml_out, '', 'Error', error ); channel_out.appendChild(item_out)
+    channel_out.appendChild(xml_out.createTextNode('\r\n'))
+    channel_out.appendChild(xml_out.createTextNode('\r\n'))
+    return xml_out
+
+
 # Convert the DOM tree passed in (xml_in) to the same tree, and return that.
 # Some attributes and tags are dropped (not needed for the NarrowCast interpreter).
 # The only crucial feature at this moment is sub-setting the number of items.
-def xml_convert(xml_in):
+def xml_convert(xml_in,limit):
     # Create empty xml_out 
     xml_out= xml.dom.minidom.Document(); 
     rss_out= xml_out.createElement('rss'); xml_out.appendChild(rss_out); 
@@ -87,7 +105,7 @@ def xml_convert(xml_in):
     if len(items_in)<1: item_out= xml_createitem(xml_out,'','Error','xml file does not have <item>s in <channel> in <rss>'); channel_out.appendChild(item_out); return xml_out
     ix = 0
     for item_in in items_in:
-        if ix>=3: break
+        if ix>=limit: break
         channel_out.appendChild(xml_out.createComment(str(ix))); channel_out.appendChild(xml_out.createTextNode('\r\n'))
         itemenclosure_in= xml_getChildrenByTagName(item_in,'enclosure')
         if len(itemenclosure_in)!=1: item_out= xml_createitem(xml_out,'','Error','xml file: <item> '+str(ix)+' should have 1 enclosure'); channel_out.appendChild(item_out); return xml_out
@@ -102,13 +120,41 @@ def xml_convert(xml_in):
     return xml_out
 
 
+# Returns tuple (error,src,limit), where src and limit are parsed from the URL
+#     ?src=http://www.nu.nl/rss/Algemeen&limit=-4
+# If all ok, error==None, otherwise error is a string describing what is wrong
+def url_parse(environ):
+    query_parms= urlparse.parse_qs( environ.get('QUERY_STRING') )
+    # Get 'src' param
+    src= query_parms.get('src')
+    if src==None: return ('Add src= to URL, e.g    ?src=http://www.nu.nl/rss/Algemeen%26limit=4',None,None)
+    s_src=src[0]
+    # Get 'limit' param
+    limit= query_parms.get('limit')
+    if limit==None: 
+        i_limit= 3 # default limit
+    else: 
+        if len(limit)>1: return ('There is more than one limit=xxx in the URL',None,None)
+        try: 
+            i_limit=int(limit[0])
+        except:
+            return ('The limit in the URL must be int',None,None)
+        if i_limit<1: return ('The limit in the URL must be positive',None,None)
+    return (None,s_src,i_limit)
+
+        
 def application(environ, start_response):
-    xml_in= xml_get('http://www.nu.nl/rss/Algemeen')
-    xml_out= xml_convert(xml_in)
+    (error,src,limit)= url_parse(environ)
+    if error==None: 
+        xml_in= xml_get( src )
+        xml_out= xml_convert(xml_in,limit)
+    else:
+        xml_out= xml_error(error)
+    status = '200 OK'
     start_response('200 OK',[('Content-type','text/xml')])
     return [ xml_out.toxml().encode('utf-8') ]
 
-    
+
 if __name__ == "__main__":
     # Test - execute only if run as a script
     xml_in= xml_get('http://www.nu.nl/rss/Algemeen')
