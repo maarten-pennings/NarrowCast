@@ -84,7 +84,7 @@ def xml_error(error):
 # Convert the DOM tree passed in (xml_in) to the same tree, and return that.
 # Some attributes and tags are dropped (not needed for the NarrowCast interpreter).
 # The only crucial feature at this moment is sub-setting the number of items.
-def xml_convert(xml_in,limit):
+def xml_convert(xml_in):
     # Create empty xml_out 
     xml_out= xml.dom.minidom.Document(); 
     rss_out= xml_out.createElement('rss'); xml_out.appendChild(rss_out); 
@@ -105,7 +105,6 @@ def xml_convert(xml_in,limit):
     if len(items_in)<1: item_out= xml_createitem(xml_out,'','Error','xml file does not have <item>s in <channel> in <rss>'); channel_out.appendChild(item_out); return xml_out
     ix = 0
     for item_in in items_in:
-        if ix>=limit: break
         channel_out.appendChild(xml_out.createComment(str(ix))); channel_out.appendChild(xml_out.createTextNode('\r\n'))
         itemenclosure_in= xml_getChildrenByTagName(item_in,'enclosure')
         if len(itemenclosure_in)!=1: item_out= xml_createitem(xml_out,'','Error','xml file: <item> '+str(ix)+' should have 1 enclosure'); channel_out.appendChild(item_out); return xml_out
@@ -120,8 +119,8 @@ def xml_convert(xml_in,limit):
     return xml_out
 
 
-# Returns tuple (error,src,limit), where src and limit are parsed from the URL
-#     ?src=http://www.nu.nl/rss/Algemeen&limit=-4
+# Returns tuple (error,src), where src is parsed from the URL
+#     ?src=http://www.nu.nl/rss/Algemeen
 # If all ok, error==None, otherwise error is a string describing what is wrong
 def url_parse(environ):
     query_parms= urlparse.parse_qs( environ.get('QUERY_STRING') )
@@ -129,25 +128,14 @@ def url_parse(environ):
     src= query_parms.get('src')
     if src==None: return ('Add src= to URL, e.g    ?src=http://www.nu.nl/rss/Algemeen%26limit=4',None,None)
     s_src=src[0]
-    # Get 'limit' param
-    limit= query_parms.get('limit')
-    if limit==None: 
-        i_limit= 3 # default limit
-    else: 
-        if len(limit)>1: return ('There is more than one limit=xxx in the URL',None,None)
-        try: 
-            i_limit=int(limit[0])
-        except:
-            return ('The limit in the URL must be int',None,None)
-        if i_limit<1: return ('The limit in the URL must be positive',None,None)
-    return (None,s_src,i_limit)
+    return (None,s_src)
 
         
 def application(environ, start_response):
-    (error,src,limit)= url_parse(environ)
+    (error,src)= url_parse(environ)
     if error==None: 
         xml_in= xml_get( src )
-        xml_out= xml_convert(xml_in,limit)
+        xml_out= xml_convert(xml_in)
     else:
         xml_out= xml_error(error)
     status = '200 OK'
