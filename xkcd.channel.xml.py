@@ -1,4 +1,4 @@
-# Script to convert XKCD rss feed to NarrowCast rss feed (with only one item)
+# xkcd.channel.xml.py - Script to convert XKCD rss feed to NarrowCast rss feed (with only one item)
 # 2019 feb 19  v1  Maarten Pennings  Created
 
 
@@ -6,16 +6,14 @@
 #   https://www.howtoforge.com/tutorial/how-to-run-python-scripts-with-apache-and-mod_wsgi-on-ubuntu-18-04/
 
 # Create a python scipt (e.g. xkcd.channel.py) and assign rights
-#   cd /var/www/html/rss
-#   sudo vi xkcd.channel.py
-#   sudo chown maarten:www-data xkcd.channel.py
-#   sudo chmod 755 xkcd.channel.py
+#   sudo chown maarten:www-data xkcd.channel.xml.py
+#   sudo chmod 755 xkcd.channel.xml.py
 
-# Map python script 'xkcd.channel.py' to url '/rss/xkcd.channel.xml'
+# Map python script 'xkcd.channel.xml.py' to url 'rss/xkcd.channel.xml'
 #   Edit configuration file    
 #     sudo vi /etc/apache2/conf-available/wsgi.conf
-#   Add the mapping by adding:
-#     WSGIScriptAlias /rss/xkcd.channel.xml /var/www/html/rss/xkcd.channel.py
+#   and add the mapping by adding:
+#     WSGIScriptAlias /rss/xkcd.channel.xml /var/www/html/rss/xkcd.channel.xml.py
 
 # Then, enable mod-wsgi configuration and restart Apache service with the following command:
 #   sudo a2enconf wsgi
@@ -37,7 +35,7 @@ def text(elm):
     return val
 
 
-# Parse the XKCD rss feed and return the first rss item as a tuple (title, desc, src)
+# Parse the XKCD rss feed and return the first item in a tuple (title, desc, src)
 # Returns None on parsing error
 def parse(page):
     # Parse the page to get the first item
@@ -61,7 +59,6 @@ def parse(page):
     desc= imgs[0].getAttribute("title")
     return (title, desc, src)
 
-
 def application(environ, start_response):
     # input
     url= 'https://xkcd.com/rss.xml'
@@ -70,7 +67,7 @@ def application(environ, start_response):
     page= resp.read()
     # processing
     result= parse(page)
-    if result==None: result=('Error',url,'https://imgs.xkcd.com/comics/not_available.png')
+    if result==None: result=('Error',url, 'https://imgs.xkcd.com/comics/not_available.png')
     # output
     status = '200 OK'
     xml=  '<?xml version="1.0" encoding="utf-8"?>\r\n'\

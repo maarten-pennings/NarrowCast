@@ -1,19 +1,19 @@
-# Script to bridge an rss feed (eg https://www.nu.nl/rss.html) - it is just a copy to work around CORS
+# rss.channel.xml.py - Script to bridge an rss feed (eg https://www.nu.nl/rss.html) - it is just a copy to work around CORS
 # 2019 feb 20  v1  Maarten Pennings  Created
 
 
 # To merge Python into Apache on Ubuntu:
 #   https://www.howtoforge.com/tutorial/how-to-run-python-scripts-with-apache-and-mod_wsgi-on-ubuntu-18-04/
 
-# Create a python scipt (e.g. rss.channel.py) and assign rights
-#   sudo chown maarten:www-data rss.channel.py
-#   sudo chmod 755 rss.channel.py
+# Create a python scipt (e.g. rss.channel.xml.py) and assign rights
+#   sudo chown maarten:www-data rss.channel.xml.py
+#   sudo chmod 755 rss.channel.xml.py
 
-# Map python script 'rss.channel.py' to url 'rss/rss.channel.xml'
+# Map python script 'rss.channel.xml.py' to url 'rss/rss.channel.xml'
 #   Edit configuration file    
 #     sudo vi /etc/apache2/conf-available/wsgi.conf
-#   Add the mapping by adding:
-#     WSGIScriptAlias /rss/rss.channel.xml /var/www/html/rss/rss.channel.py
+#   and add the mapping by adding:
+#     WSGIScriptAlias /rss/rss.channel.xml /var/www/html/rss/rss.channel.xml.py
 
 # Then, enable mod-wsgi configuration and restart Apache service with the following command:
 #   sudo a2enconf wsgi
@@ -126,7 +126,7 @@ def url_parse(environ):
     query_parms= urlparse.parse_qs( environ.get('QUERY_STRING') )
     # Get 'src' param
     src= query_parms.get('src')
-    if src==None: return ('Add src= to URL, e.g    ?src=http://www.nu.nl/rss/Algemeen%26limit=4',None,None)
+    if src==None: return ('Add src= to URL, e.g append   ?src=http://www.nu.nl/rss/Algemeen',None)
     s_src=src[0]
     return (None,s_src)
 
