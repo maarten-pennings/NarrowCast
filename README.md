@@ -31,7 +31,7 @@ Use Chrome, Frirefox, Edge, but not IE (sorry).
 The actual sources of this project can be found in the github
 [web project](https://github.com/maarten-pennings/maarten-pennings.github.io/tree/master/NarrowCast).
 
-This project only serves as documentation.
+This project only serves as documentation and for some server side scripts.
 
 
 # Setup
