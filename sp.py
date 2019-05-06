@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # sp.py - Script to bridge to a sharepoint site (which requires login)
 #         e.g. http://192.168.1.1/sp?http://sharepoint.company.com/pictures/banner.jpg
+# 2019 may 06  v2  Maarten Pennings  Moved cfg.py
 # 2019 may 03  v1  Maarten Pennings  Created
 
 
@@ -9,8 +10,7 @@ import requests_ntlm
 
 
 # Import cfg.username, cfg.password, cfg.hostname, cfg.hostip
-# import sys; sys.path.append("."); import cfg
-import sys; import os; sys.path.append(os.path.dirname(os.path.realpath(__file__))); import cfg
+import sys; sys.path.append( "/var/www" ); import cfg
 
 
 def application(environ, start_response):
