@@ -29,6 +29,7 @@ import requests
 import requests_ntlm
 import xml.dom.minidom
 
+#sys.setdefaultencoding('utf-8')
 
 # Import cfg.username, cfg.password, cfg.hostname, cfg.hostip
 import sys; sys.path.append( "/var/www" ); import cfg
@@ -141,7 +142,7 @@ def download():
   session = requests.Session() 
   response = session.get(url, auth=requests_ntlm.HttpNtlmAuth(cfg.username,cfg.password), headers={'Host':cfg.hostname} ) # Hack because DNS is not working
   if response.status_code==200: 
-    rssdata= response.content.strip(b'\xef\xbb\xbf').decode()
+    rssdata= response.content.strip(b'\xef\xbb\xbf').decode('utf-8')
     rsstriples= xml2triples(rssdata)
   else:
     rsstriples=[('Error','Failed to read '+rssout,'error')]
@@ -150,11 +151,16 @@ def download():
 
 def application(environ, start_response):
   xml= download()
-  start_response( '200 ERROR', [('Content-type','text/plain')] )
+  start_response( '200 OK', [('Content-type','text/plain')] )
   return [ xml.encode('utf-8') ]
 
   
 if __name__ == "__main__":
   xml= download()
   print( xml )
+  # [E2 80 9C] [E2 80 98] [E2 80 99] [E2 80 9D]    .replace(b'\xe2\x80\x99',b'\'')
+  s=b'After years of R&amp;D we developed the world\xe2\x80\x99s first sensor'
+  print( 'plain', s)
+  print( 'decode()', s.decode() )
+  print( 'decode(utf-8)', s.decode('utf-8') )
 

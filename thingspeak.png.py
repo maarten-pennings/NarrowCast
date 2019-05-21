@@ -5,7 +5,8 @@ import matplotlib
 matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
-import urllib2, json 
+import json 
+import requests
 import os, sys, io
 from datetime import datetime,timedelta
 from dateutil import tz
@@ -24,22 +25,10 @@ def application(environ, start_response):
     to_zone = tz.tzlocal()
     for idata in range(len(info_plot)):          
         url= "https://thingspeak.com/channels/"+info_plot[idata][0]+"/field/"+info_plot[idata][1]+".json?results="+info_plot[idata][3]
-        req= urllib2.Request(url)
-        resp= urllib2.urlopen(req)
-#        resp = urllib.request.urlopen(url)
-        text= resp.read()
-        data.append(json.loads(text.decode("utf-8")))
-#    print(data)
-#    name= data[u'channel'][u'name']
-##    desc= data[u'channel'][u'description']
-#    cap1= data[u'channel'][u'field1']
-#    feeds= data[u'feeds']
-    #print(desc)
-    #print(data)
+        resp= requests.get(url)
+        text= resp.text
+        data.append(json.loads(text))
 
-    #start_response('200 OK',[('Content-type','text/html')])
-    #return ["<body><html>test 1 {0}</html></body>".format(desc)] 
-    
     plt.ioff()
     fig = plt.figure(figsize=[19.2*0.8,10*0.8])
    
@@ -57,7 +46,6 @@ def application(environ, start_response):
             
         plt.subplot(int("23"+str(idata+1)))
         plt.plot(dtime, plotdata,'.-', color = info_plot[idata][2])
-#        plt.xlim([dtime[-1]-timedelta(days=1), dtime[-1]])
         plt.xlabel('Date')
         plt.ylabel(plotname)
         plt.title(data[idata]["channel"]["name"]) 
@@ -65,9 +53,6 @@ def application(environ, start_response):
         ax = plt.gca()
         ax.get_yaxis().get_major_formatter().set_useOffset(False)
         
-#        if 'Resistance' in plotname:
-#            plt.yscale('log')
-            
     plt.tight_layout()
 
     with io.BytesIO() as memfile:

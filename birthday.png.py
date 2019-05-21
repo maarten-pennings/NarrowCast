@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 # sudo pip install pillow
 # sudo pip install xlrd

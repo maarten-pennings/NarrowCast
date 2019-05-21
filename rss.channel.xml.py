@@ -6,6 +6,11 @@
 version = "v2"
 
 
+# For debugging, check Python version
+import platform
+version+= ' on python '+platform.python_version()
+
+
 # To merge Python into Apache on Ubuntu:
 #   https://www.howtoforge.com/tutorial/how-to-run-python-scripts-with-apache-and-mod_wsgi-on-ubuntu-18-04/
 
@@ -27,21 +32,13 @@ version = "v2"
 import sys
 import ntpath
 import requests
-import urllib2
 import xml.dom.minidom
-import urlparse
 
 
 # Download a file, given its URL, and return it as a DOM (xml tree)
 def xml_get(url):
-    if False:
-      resp= requests.get(url)
-      return xml.dom.minidom.parseString(resp.text)
-    else:
-      req= urllib2.Request(url)
-      resp= urllib2.urlopen(req)
-      data= resp.read()
-      return xml.dom.minidom.parseString(data)
+    resp= requests.get(url)
+    return xml.dom.minidom.parseString(resp.text)
 
 
 # Get the text string from a DOM element (safely)
@@ -130,38 +127,35 @@ def xml_convert(xml_in):
     return xml_out
 
 
-# Returns tuple (error,src), where src is parsed from the URL
-#     ?src=http://www.nu.nl/rss/Algemeen
+# Returns tuple (error,url), where url is parsed from the URL
+#     ?http://www.nu.nl/rss/Algemeen
 # If all ok, error==None, otherwise error is a string describing what is wrong
 def url_parse(environ):
-    query_parms= urlparse.parse_qs( environ.get('QUERY_STRING') )
-    # Get 'src' param
-    src= query_parms.get('src')
-    if src==None: return ('Add src= to URL, e.g append   ?src=http://www.nu.nl/rss/Algemeen',None)
-    s_src=src[0]
-    return (None,s_src)
-    
-def url_parse_new(environ):
-    src= environ.get('QUERY_STRING')
-    if src==None or src=="": return ('Add src= to URL, e.g append   ?src=http://www.nu.nl/rss/Algemeen',None)
-    return (None,src)
+    url= environ.get('QUERY_STRING')
+    if url==None or url=="": 
+      return ('Add rss-url to URL, e.g append   ?http://www.nu.nl/rss/Algemeen',None)
+    else:
+      # The next two lines strip any extra arguments - this is a hack, narrowcast addes a nounce and nu.nl can't handle that
+      pos= url.find('&')
+      if pos>=0: url= url[:pos] 
+    return (None,url)
 
         
 def application(environ, start_response):
-    (error,src)= url_parse(environ)
+    (error,url)= url_parse(environ)
     if error==None: 
-        xml_in= xml_get( src )
+        xml_in= xml_get(url)
         xml_out= xml_convert(xml_in)
     else:
         xml_out= xml_error(error)
     start_response('200 OK',[('Content-type','text/xml')])
     xml= xml_out.toprettyxml(indent='  ', newl="\r\n", encoding='utf-8') 
-    return [ xml ] # toxml().encode('utf-8')
+    return [ xml ] 
 
 
 if __name__ == "__main__":
-    src= 'http://www.nu.nl/rss/Algemeen'
-    xml_in= xml_get(src)
+    url= 'http://www.nu.nl/rss/Algemeen'
+    xml_in= xml_get(url)
     xml_out= xml_convert(xml_in)
     xml= xml_out.toprettyxml(indent='  ', newl="\r\n", encoding='utf-8') 
     print( xml )

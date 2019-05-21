@@ -7,6 +7,11 @@
 version = "v3"
 
 
+# For debugging, check Python version
+import platform
+version+= ' on python '+platform.python_version()
+
+
 # To merge Python into Apache on Ubuntu:
 #   https://www.howtoforge.com/tutorial/how-to-run-python-scripts-with-apache-and-mod_wsgi-on-ubuntu-18-04/
 
@@ -96,7 +101,7 @@ def rss(triple):
 def application(environ, start_response):
     xml= rss(loadtriple())
     start_response( '200 OK' , [('Content-type','text/xml')] )
-    return [xml]
+    return [xml.encode()]
 
 # The entry point for commandline test
 if __name__ == "__main__":
