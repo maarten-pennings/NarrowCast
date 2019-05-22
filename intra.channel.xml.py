@@ -7,7 +7,7 @@ version = "v2"
 
 
 # To merge Python into Apache on Ubuntu:
-#   https://www.howtoforge.com/tutorial/how-to-run-python-scripts-with-apache-and-mod_wsgi-on-ubuntu-18-04/
+#   sudo apt install apache2 libapache2-mod-wsgi-py3  # for python3
 
 # Create a python scipt (e.g. intra.channel.xml.py) and assign rights
 #   sudo chown maarten:www-data intra.channel.xml.py
@@ -15,13 +15,16 @@ version = "v2"
 
 # Map python script 'intra.channel.xml.py' to url 'rss/intra.channel.xml'
 #   Edit configuration file    
-#     sudo vi /etc/apache2/conf-available/wsgi.conf
-#   and add the mapping by adding:
+#     sudo vi /etc/apache2/sites-available/000-default.conf
+#   and add the line in the section <VirtualHost *:80>
 #     WSGIScriptAlias /rss/intra.channel.xml /var/www/html/rss/intra.channel.xml.py
 
 # Then, enable mod-wsgi configuration and restart Apache service with the following command:
 #   sudo a2enconf wsgi
 #   sudo systemctl restart apache2
+
+# To check errors in script look at the log
+#   less /var/log/apache2/error.log
 
 
 import sys
