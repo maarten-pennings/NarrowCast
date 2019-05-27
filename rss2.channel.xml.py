@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 
 # rss2.channel.xml.py - Script to bridge an rss feed (eg https://www.nrc.nl/rss) - it is just a copy to work around CORS
+# 2019 may 27  v2  Maarten Pennings  Improved xml_text
 # 2019 may 23  v1  Maarten Pennings  Redesign of older variant (rss.channel.xml.py)
-version = "v1"
+version = "v2"
 
 
 # To merge Python into Apache on Ubuntu:
@@ -35,11 +36,14 @@ from xml.sax.saxutils import escape
 
 # Get the text string from a DOM element (safely)
 def xml_text(node):
-    s= ""
-    if node==None: return s
+    if node==None: return ""
+    result= ""
     for child in node.childNodes:
-      s+= escape(child.data).strip()
-    return s
+      s= child.data.strip() # Get rid of pre or post whitespace
+      if s[:3]=='<p>' and s[-4:]=='</p>':  s= s.replace('<p>','').replace('</p>','') # Some site surround description with <p>..</p>. Remove it. 
+      if result!="" and s!="": s+= " " # If multiple non-empty children, add separating space
+      result+= escape(s) # escape xml char (& -> &amp;)
+    return result
 
 
 def parse(rssin):
@@ -71,11 +75,15 @@ def parse(rssin):
       # Get <description> from <item>
       itemdescription= item.getElementsByTagName('description')
       if len(itemdescription)!=1: raise Exception('xml file: <item> '+str(ix)+' should have 1 description')
-      # Get <enclosure> from <item>
+      # Get <enclosure> (and item url) from <item>
       itemenclosure= item.getElementsByTagName('enclosure')
       if len(itemenclosure)!=1: raise Exception('xml file: <item> '+str(ix)+' should have 1 enclosure')
+      itemurl= itemenclosure[0].getAttribute('url')
+      # NRC trick to enlarge pictures
+      pos= itemurl.find('static.nrc.nl')
+      if pos>0: itemurl= 'https://'+itemurl[pos:]
       # Append triple
-      triples.append( (xml_text(itemtitle[0]), xml_text(itemdescription[0]), itemenclosure[0].getAttribute('url')) )
+      triples.append( (xml_text(itemtitle[0]), xml_text(itemdescription[0]), itemurl ) )
       ix= ix+1
     # Step 3: Return results
     return (meta,triples)
