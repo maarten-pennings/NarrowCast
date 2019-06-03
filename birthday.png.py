@@ -122,11 +122,12 @@ def table2Img(md_namedates_dict, dbg):
                 if (now.month==month) and (now.day==day) :
                     fgcolor=div_fgcolor_cellhi
                     bgcolor=div_bgcolor_cellhi
-                    draw.polygon( [(X,Y+int(div_dRY/2)-8),(X-30,Y-8),(X-30,Y+div_dRY-8)], fill=div_bgcolor_cellhi, outline=div_fgcolor_cellhi) # draw cursor
-                    cursordrawn= True
                 draw.rectangle([X-8,Y-8,X+div_dRX-8,Y+div_dRY-8],fill=bgcolor,outline=bgcolor)
                 draw.text((X,Y),'{:2d}'.format(day),fgcolor,font=font_cell)
                 draw.text((X+div_dRX2,Y),str(name),fgcolor,font=font_cell)
+                if (now.month==month) and (now.day==day) :
+                    draw.polygon( [(X,Y+int(div_dRY/2)-8),(X-30,Y-8),(X-30,Y+div_dRY-8)], fill=div_bgcolor_cellhi, outline=div_fgcolor_cellhi) # draw cursor
+                    cursordrawn= True
                 Y=Y+div_dY
         if (now.month==month) and not cursordrawn:
             dy= int(div_dY/2)
@@ -134,7 +135,7 @@ def table2Img(md_namedates_dict, dbg):
             cursordrawn= True
         X= X+div_dX
     # Draw dbg
-    draw.text((div_X0,height-div_fontsize_dbg-8),dbg+" "+now.strftime('%Y%m%d %H:%M'),div_fgcolor_dbg,font=font_dbg)
+    draw.text((div_X0,height-div_fontsize_dbg-8),dbg+" "+now.strftime('%Y-%m-%d %H:%M'),div_fgcolor_dbg,font=font_dbg)
     return newImage
 
 # Reads an xls file from local path `xlsname`    
@@ -156,7 +157,7 @@ def readXLSX(xlsname):
             except:
                 if len(name_date_list)>0: rejects= rejects+1
                 pass
-        log= str(len(name_date_list))+" ok, "+str(rejects)+" rejected"
+        log= str(len(name_date_list))+" ok, "+str(rejects)+" errors"
     except:
         name_date_list.append( ("Error",datetime.datetime.now()) )
         log= "Failed to open '"+xlsname+"'" if len(xlsname)>0 else "Missing calender, append ?ehv-birthdays.xlsx to URL" 
