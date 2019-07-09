@@ -38,7 +38,9 @@ from xml.sax.saxutils import escape
 def xml_text(node):
     if node==None: return ""
     result= ""
+    if node.tagName=="description" and len(node.childNodes)==1 and node.childNodes[0].tagName=="p": node= node.childNodes[0] # Telegraaf adds <p> around description
     for child in node.childNodes:
+      if not hasattr(child, 'data'): continue
       s= child.data.strip() # Get rid of pre or post whitespace
       if s[:3]=='<p>' and s[-4:]=='</p>':  s= s.replace('<p>','').replace('</p>','') # Some site surround description with <p>..</p>. Remove it. 
       if result!="" and s!="": s+= " " # If multiple non-empty children, add separating space
@@ -60,7 +62,9 @@ def parse(rssin):
     titles= channels[0].getElementsByTagName('title')
     if len(titles)<1 or titles[0].parentNode!=channels[0]: raise Exception('xml file does not have <title> in <channel> in <rss>')
     # Set meta
-    meta= ( xml_text(titles[0]), 'other meta vars could go here' )
+    chtitle= xml_text(titles[0])
+    chtitle=  chtitle[0].upper() + chtitle[1:] # enforce inital cap - should we do that?
+    meta= ( chtitle, 'other meta vars could go here' )
     # Step 2: Parse items
     # Init triples
     triples= []
@@ -79,9 +83,11 @@ def parse(rssin):
       itemenclosure= item.getElementsByTagName('enclosure')
       if len(itemenclosure)!=1: raise Exception('xml file: <item> '+str(ix)+' should have 1 enclosure')
       itemurl= itemenclosure[0].getAttribute('url')
-      # NRC trick to enlarge pictures
+      # NRC/telegraaf trick to have better pictures (enlarged, animated gifs, alpha channel)
       pos= itemurl.find('static.nrc.nl')
-      if pos>0: itemurl= 'https://'+itemurl[pos:]
+      if pos==-1: pos= itemurl.find('cdn-kiosk-api.telegraaf.nl')
+      if pos>=0: itemurl= 'https://'+itemurl[pos:]
+      itemurl= itemurl.replace('%25','%')
       # Append triple
       triples.append( (xml_text(itemtitle[0]), xml_text(itemdescription[0]), itemurl ) )
       ix= ix+1
