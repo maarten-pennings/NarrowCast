@@ -15,7 +15,7 @@ import io
 import xlrd
 
 
-div_Y0=50                            # top and bottom margin
+div_Y0=75                            # top and bottom margin
 div_X0=50                            # left and right margin
 div_dY=100                           # row step
 div_dRY=div_dY-40                    # height of the rectangles
@@ -88,7 +88,7 @@ def table2Img(md_namedates_dict, dbg):
     width=width-(div_dX-div_dRX)+div_X0
     height=height+div_dY-div_dRY+div_Y0
     # Start drawing on image
-    newImage = Image.new('RGBA', (width,height), "white" )
+    newImage = Image.new('RGBA', (width,height), 0 ) # or "white"
     draw = ImageDraw.Draw(newImage)
     font_cell = ImageFont.truetype(getPath(div_fontname_cell), div_fontsize_cell)
     font_head = ImageFont.truetype(getPath(div_fontname_head), div_fontsize_head)
