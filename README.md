@@ -86,6 +86,10 @@ Next edit it. I uncommented one line and added some others
 @chromium-browser --incognito --kiosk https://maarten-pennings.github.io/NarrowCast/narrowcast.html?example.list.xml&mix
 ```
 
+Instead of `--kiosk` you can also try `--start-fullscreen`. 
+The former is also full screen but you can not exit it. 
+
+
 # Bridges (server side scripts)
 We can also run scripts on the (central) server, so that we can bridge non-picture contents to picture content.
 A simple example is provided for [python](xkcd.channel.xml.py).
