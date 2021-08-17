@@ -1,23 +1,22 @@
 #!/usr/bin/python3
 
-# rss2.channel.xml.py - Script to bridge an rss feed (eg https://www.nrc.nl/rss) - it is just a copy to work around CORS
-# 2019 may 27  v2  Maarten Pennings  Improved xml_text
-# 2019 may 23  v1  Maarten Pennings  Redesign of older variant (rss.channel.xml.py)
-version = "v2"
+# rss3.channel.xml.py - Script to bridge an rss feed (and convert media:content to enclosure) - it is just a copy to work around CORS
+# 2020 feb 28  v1  Maarten Pennings  Copied from rss2
+version = "v1"
 
 
 # To merge Python into Apache on Ubuntu:
 #   sudo apt install apache2 libapache2-mod-wsgi-py3  # for python3
 
-# Create a python scipt (e.g. rss2.channel.xml.py) and assign rights
-#   sudo chown maarten:www-data rss2.channel.xml.py
-#   sudo chmod 755 rss2.channel.xml.py
+# Create a python script (e.g. rss3.channel.xml.py) and assign rights
+#   sudo chown maarten:www-data rss3.channel.xml.py
+#   sudo chmod 755 rss3.channel.xml.py
 
-# Map python script 'rss2.channel.xml.py' to url 'rss/rss2.channel.xml'
+# Map python script 'rss3.channel.xml.py' to url 'rss/rss3.channel.xml'
 #   Edit configuration file    
 #     sudo vi /etc/apache2/sites-available/000-default.conf
 #   and add the line in the section <VirtualHost *:80>
-#     WSGIScriptAlias /rss/rss2.channel.xml /var/www/html/rss/rss2.channel.xml.py
+#     WSGIScriptAlias /rss/rss3.channel.xml /var/www/html/rss/rss3.channel.xml.py
 
 # Then, enable mod-wsgi configuration and restart Apache service with the following command:
 #   sudo a2enconf wsgi
@@ -79,19 +78,12 @@ def parse(rssin):
       # Get <description> from <item>
       itemdescription= item.getElementsByTagName('description')
       if len(itemdescription)!=1: raise Exception('xml file: <item> '+str(ix)+' should have 1 description')
-      # Get <enclosure> (and item url) from <item>
-      itemenclosure= item.getElementsByTagName('enclosure')
-      if len(itemenclosure)!=1: raise Exception('xml file: <item> '+str(ix)+' should have 1 enclosure')
+      # Get <media:content> (and item url) from <item>
+      itemenclosure= item.getElementsByTagName('media:content')
+      if len(itemenclosure)!=1: continue # item has media groups, skip these # raise Exception('xml file: <item> '+str(ix)+' should have 1 media:content '+xml_text(itemdescription[0]))
       itemurl= itemenclosure[0].getAttribute('url')
-      # NRC/telegraaf trick to have better pictures (enlarged, animated gifs, alpha channel)
-      ### pos= itemurl.find('static.nrc.nl')
-      ### if pos==-1: pos= itemurl.find('cdn-kiosk-api.telegraaf.nl')
-      ### if pos>=0: itemurl= 'https://'+itemurl[pos:]
-      itemurl= itemurl.replace('%25','%')
-      # NU.nl trick to have better pictures (enlarged)
-      pos= itemurl.find('media.nu.nl')
-      if pos>=0: pos= itemurl.find('sqr256.jpg') 
-      if pos>=0: itemurl= itemurl[:pos] + 'sqr512.jpg' + itemurl[pos+10:]
+      if itemurl.endswith('mp4'): continue # item has video's, skip these
+      if itemurl=="": continue # item has no url
       # Append triple
       triples.append( (xml_text(itemtitle[0]), xml_text(itemdescription[0]), itemurl ) )
       ix= ix+1
@@ -120,7 +112,7 @@ def unparse(meta,triples):
     
     
 def application(environ, start_response):
-  log= 'SYNTAX : rss2.channel.xml?<url>\r\nexample: http://192.168.1.1/rss2.channel.xml?https://www.nrc.nl/rss\r\n\r\n'
+  log= 'SYNTAX : rss3.channel.xml?<url>\r\nexample: http://10.45.100.1/rss/rss3.channel.xml?https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada\r\n\r\n'
   try:
     # Get the arguments
     args= environ.get('QUERY_STRING')

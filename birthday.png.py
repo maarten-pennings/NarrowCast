@@ -19,14 +19,15 @@ div_Y0=75                            # top and bottom margin
 div_X0=50                            # left and right margin
 div_dY=100                           # row step
 div_dRY=div_dY-40                    # height of the rectangles
-div_dX=500                           # column step
+div_dX=600                           # column step
 div_dRX=div_dX-80                    # width of the date+name rectangles
 div_dRX2=50                          # width of the date area
 div_fontsize_cell=35                 # font size for plain cells
 div_fontname_cell="ARIAL.TTF"        # font name for plain cells
 div_fgcolor_cell=(0,0,0,255)         # foreground color for plain cells
 div_fgcolor_cellhi=(0,100,0,255)     # foreground color for plain cells highlighted (birthday now)
-div_bgcolor_cell=(200,200,200,255)   # background color for plain cells
+#div_bgcolor_cell=(200,200,200,255)   # background color for plain cells
+div_bgcolor_cell=(230,230,250,255)   # background color for plain cells
 div_bgcolor_cellhi=(150,250,150,255) # background color for plain cells highlighted (birthday now)
 div_fontsize_head=40                 # font size for header cells
 div_fontname_head="ARIALBD.TTF"      # font name for header cells
@@ -88,7 +89,7 @@ def table2Img(md_namedates_dict, dbg):
     width=width-(div_dX-div_dRX)+div_X0
     height=height+div_dY-div_dRY+div_Y0
     # Start drawing on image
-    newImage = Image.new('RGBA', (width,height), 0 ) # or "white"
+    newImage = Image.new('RGBA', (width,height), 0 )
     draw = ImageDraw.Draw(newImage)
     font_cell = ImageFont.truetype(getPath(div_fontname_cell), div_fontsize_cell)
     font_head = ImageFont.truetype(getPath(div_fontname_head), div_fontsize_head)

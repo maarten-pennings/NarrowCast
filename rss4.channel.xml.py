@@ -1,23 +1,22 @@
 #!/usr/bin/python3
 
-# rss2.channel.xml.py - Script to bridge an rss feed (eg https://www.nrc.nl/rss) - it is just a copy to work around CORS
-# 2019 may 27  v2  Maarten Pennings  Improved xml_text
-# 2019 may 23  v1  Maarten Pennings  Redesign of older variant (rss.channel.xml.py)
-version = "v2"
+# rss4.channel.xml.py - Script to bridge an rss feed
+# 2020 aug 27  v1  Maarten Pennings  Copied from rss3
+version = "v1"
 
 
 # To merge Python into Apache on Ubuntu:
 #   sudo apt install apache2 libapache2-mod-wsgi-py3  # for python3
 
-# Create a python scipt (e.g. rss2.channel.xml.py) and assign rights
-#   sudo chown maarten:www-data rss2.channel.xml.py
-#   sudo chmod 755 rss2.channel.xml.py
+# Create a python script (e.g. rss4.channel.xml.py) and assign rights
+#   sudo chown maarten:www-data rss4.channel.xml.py
+#   sudo chmod 755 rss4.channel.xml.py
 
-# Map python script 'rss2.channel.xml.py' to url 'rss/rss2.channel.xml'
+# Map python script 'rss4.channel.xml.py' to url 'rss/rss4.channel.xml'
 #   Edit configuration file    
 #     sudo vi /etc/apache2/sites-available/000-default.conf
 #   and add the line in the section <VirtualHost *:80>
-#     WSGIScriptAlias /rss/rss2.channel.xml /var/www/html/rss/rss2.channel.xml.py
+#     WSGIScriptAlias /rss/rss4.channel.xml /var/www/html/rss/rss4.channel.xml.py
 
 # Then, enable mod-wsgi configuration and restart Apache service with the following command:
 #   sudo a2enconf wsgi
@@ -76,24 +75,24 @@ def parse(rssin):
       # Get <title> from <item>
       itemtitle= item.getElementsByTagName('title')
       if len(itemtitle)!=1: raise Exception('xml file: <item> '+str(ix)+' should have 1 title')
+      stitle= xml_text(itemtitle[0])
       # Get <description> from <item>
       itemdescription= item.getElementsByTagName('description')
       if len(itemdescription)!=1: raise Exception('xml file: <item> '+str(ix)+' should have 1 description')
-      # Get <enclosure> (and item url) from <item>
-      itemenclosure= item.getElementsByTagName('enclosure')
-      if len(itemenclosure)!=1: raise Exception('xml file: <item> '+str(ix)+' should have 1 enclosure')
-      itemurl= itemenclosure[0].getAttribute('url')
-      # NRC/telegraaf trick to have better pictures (enlarged, animated gifs, alpha channel)
-      ### pos= itemurl.find('static.nrc.nl')
-      ### if pos==-1: pos= itemurl.find('cdn-kiosk-api.telegraaf.nl')
-      ### if pos>=0: itemurl= 'https://'+itemurl[pos:]
-      itemurl= itemurl.replace('%25','%')
-      # NU.nl trick to have better pictures (enlarged)
-      pos= itemurl.find('media.nu.nl')
-      if pos>=0: pos= itemurl.find('sqr256.jpg') 
-      if pos>=0: itemurl= itemurl[:pos] + 'sqr512.jpg' + itemurl[pos+10:]
+      # Get  url, it is inside the description
+      #    &lt;img src="https://www.srf.ch/static/cms/images/640w/bf195a.jpg" hspace="5" align="left" &gt;
+      s= xml_text(itemdescription[0])
+      p1=s.find('&lt;img src="')
+      if p1==-1: raise Exception('xml file: <item> '+str(ix)+' should have "&lt;img src=\"" in description')
+      p2=s.find('"',p1+13)
+      if p2==-1: raise Exception('xml file: <item> '+str(ix)+' should have closing "\"" in description')
+      p3=s.find('&gt;',p2)
+      if p3==-1: raise Exception('xml file: <item> '+str(ix)+' should have "&gt;" in description')
+      sdescription= s[p3+4:]
+      surl= s[p1+13:p2]
+      #raise Exception( f'{p1} {p2} {p3} "{s}" "{sdescription}" "{surl}"')
       # Append triple
-      triples.append( (xml_text(itemtitle[0]), xml_text(itemdescription[0]), itemurl ) )
+      triples.append( (stitle,sdescription,surl) )
       ix= ix+1
     # Step 3: Return results
     return (meta,triples)
@@ -120,7 +119,7 @@ def unparse(meta,triples):
     
     
 def application(environ, start_response):
-  log= 'SYNTAX : rss2.channel.xml?<url>\r\nexample: http://192.168.1.1/rss2.channel.xml?https://www.nrc.nl/rss\r\n\r\n'
+  log= 'SYNTAX : rss4.channel.xml?<url>\r\nexample: http://10.45.100.1/rss/rss4.channel.xml?https://www.srf.ch/news/bnf/rss/1890\r\n\r\n'
   try:
     # Get the arguments
     args= environ.get('QUERY_STRING')
