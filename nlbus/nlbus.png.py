@@ -2,9 +2,10 @@
 
 
 # nlbus.png.py - Script creating a timetable for bus stops (in the Netherlands)
+# 2021 oct 28  v3  Maarten Pennings  renamed to nlbus.png.py, added path to mapname, maxrow converted to int
 # 2021 oct 01  v2  Maarten Pennings  Fixed bug that removed departures, added row limit, more flex in fgcolor
 # 2021 sep 29  v1  Maarten Pennings  Created
-version = "v2"
+version = "v3"
 
 
 # You need some modules
@@ -142,6 +143,15 @@ div_now_fontsize=16                             # font size for server "now" tim
 div_now_fgcolor=const_color_amsgrey1            # foreground color for server "now" time stamp
 
 
+# Prepend the path of this script to filename to make it an absolute path
+def getPath(filename):
+  global log
+  folder = os.path.dirname(os.path.realpath(__file__))
+  path = os.path.join(folder, filename)
+  log+= f"path   : {path}\r\n"
+  return path
+
+
 # Prepend the path of this script to fonts\filename to make it an absolute path
 def getFontPath(filename):
   global log
@@ -237,7 +247,7 @@ def tables2image(tables,lowlight,mapname) :
   height = div_y_mar + div_y_head + div_y_seph + div_y_row*maxdeps + div_y_sepc*(maxdeps-1) + div_y_mar
   #  - optionally add map image
   if mapname!= None :
-    mapimg = Image.open(mapname)
+    mapimg = Image.open(getPath(mapname))
     height += div_y_sepm + mapimg.height
   # Create image of computed size
   image = Image.new("RGBA", (width,height), div_bgcolor )
@@ -340,6 +350,7 @@ def application(environ, start_response):
     maxrow = params.get('maxrow', [9999])[0]   # default: "all departures" (9999 is poor man's +inf)
     lowlight = params.get('lowlight', [""])[0] # default: all destinations are lowlighted (all match "")
     mapname = params.get('mapname', [None])[0] # default: no map
+    maxrow = int(maxrow)
     # Load actual bus data from server and convert to image
     tables,image,buffer = main(stops,maxrow,lowlight,mapname)
     # raise Exception("Aborted for testing") # Uncomment for testing

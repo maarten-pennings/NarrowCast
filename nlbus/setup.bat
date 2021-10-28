@@ -1,7 +1,7 @@
 @ECHO OFF
 
 REM If Python is not in your PATH set the PYTHONDIR manually (must end in \)
-SET PYTHONDIR=C:\Users\maarten\AppData\Local\Programs\Python\Python39\
+REM SET PYTHONDIR=C:\Users\maarten\AppData\Local\Programs\Python\Python39\
 
 REM Safety check: is there a Python 3.8
 FOR /F "tokens=1,2,3 delims=. " %%I IN ('%PYTHONDIR%python --version 2^> nul') DO IF "%%I" EQU "Python" IF "%%J" EQU "3" IF "%%K" GEQ "8" goto :PythonAvail
