@@ -49,6 +49,7 @@ def xml_text(node):
 
 
 def parse(rssin):
+    global log
     # Step 1: Parse meta part (from the header)
     # Convert string to xml dom
     dom= xml.dom.minidom.parseString(rssin)
@@ -76,24 +77,23 @@ def parse(rssin):
       # Get <title> from <item>
       itemtitle= item.getElementsByTagName('title')
       if len(itemtitle)!=1: raise Exception('xml file: <item> '+str(ix)+' should have 1 title')
+      log+= f'item{ix}: "{xml_text(itemtitle[0])}"\r\n'
       # Get <description> from <item>
       itemdescription= item.getElementsByTagName('description')
       if len(itemdescription)!=1: raise Exception('xml file: <item> '+str(ix)+' should have 1 description')
-      # Get <enclosure> (and item url) from <item>
+      # Get <enclosure> or <media:content> (and item url) from <item>
       itemenclosure= item.getElementsByTagName('enclosure')
-      if len(itemenclosure)!=1: raise Exception('xml file: <item> '+str(ix)+' should have 1 enclosure')
+      if len(itemenclosure)==0: itemenclosure= item.getElementsByTagName('media:content')
+      if len(itemenclosure)!=1: continue
       itemurl= itemenclosure[0].getAttribute('url')
-      # NRC/telegraaf trick to have better pictures (enlarged, animated gifs, alpha channel)
-      ### pos= itemurl.find('static.nrc.nl')
-      ### if pos==-1: pos= itemurl.find('cdn-kiosk-api.telegraaf.nl')
-      ### if pos>=0: itemurl= 'https://'+itemurl[pos:]
       itemurl= itemurl.replace('%25','%')
+      if itemurl.endswith('.mp4'): continue
       # NU.nl trick to have better pictures (enlarged)
       pos= itemurl.find('media.nu.nl')
       if pos>=0: pos= itemurl.find('sqr256.jpg') 
       if pos>=0: itemurl= itemurl[:pos] + 'sqr512.jpg' + itemurl[pos+10:]
       # Append triple
-      triples.append( (xml_text(itemtitle[0]), xml_text(itemdescription[0]), itemurl ) )
+      triples.append( (xml_text(itemtitle[0]), xml_text(itemdescription[0]), escape(itemurl) ) )
       ix= ix+1
     # Step 3: Return results
     return (meta,triples)
@@ -120,6 +120,7 @@ def unparse(meta,triples):
     
     
 def application(environ, start_response):
+  global log
   log= 'SYNTAX : rss2.channel.xml?<url>\r\nexample: http://192.168.1.1/rss2.channel.xml?https://www.nrc.nl/rss\r\n\r\n'
   try:
     # Get the arguments
@@ -133,8 +134,9 @@ def application(environ, start_response):
     log+= 'url    : "%s"\r\n' % url
     # Load remote rss feed
     resp= requests.get(url)
+    resp.encoding = resp.apparent_encoding
     rssin= resp.text
-    log+= 'rssin  : "%s" ...\r\n' % rssin[0:1000]
+    log+= 'rssin  : "%s" ...\r\n' % rssin[0:500]
     # Parse rss feed
     (meta,triples)= parse(rssin)
     log+= 'meta   : "%s"\r\n' % meta[0] 

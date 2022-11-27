@@ -132,6 +132,7 @@ def application(environ, start_response):
     log+= 'url    : "%s"\r\n' % url
     # Load remote rss feed
     resp= requests.get(url)
+    resp.encoding = resp.apparent_encoding
     rssin= resp.text
     log+= 'rssin  : "%s" ...\r\n' % rssin[0:1000]
     # Parse rss feed
