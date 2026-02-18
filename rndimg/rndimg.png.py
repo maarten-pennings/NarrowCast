@@ -2,8 +2,9 @@
 
 
 # rndimg.png.py - Script picking a random image from a given directory
-# 2021 nov 11  v1  Maarten Pennings  Created
-version = "v1"
+# 2021 nov 11  v1   Maarten Pennings  Created
+# 2026 feb 18  v1.1 Edwin Zuidema allowing uppercase extensions for image files
+version = "v1.1"
 
 
 # You need some modules
@@ -81,7 +82,7 @@ def main(imgsdir) :
   other = []
   for filename in os.listdir(path) :
     fullname = os.path.join(path,filename)
-    extension = os.path.splitext(fullname)[1]
+    extension = os.path.splitext(fullname)[1].lower()
     if os.path.isfile(fullname) and extension in mimetypes : 
       images.append(filename)
     else :
